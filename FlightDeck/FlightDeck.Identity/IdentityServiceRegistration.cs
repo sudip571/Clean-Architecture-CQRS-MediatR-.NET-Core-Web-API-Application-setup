@@ -89,12 +89,29 @@ namespace FlightDeck.Identity
                     };
                     o.Events = new JwtBearerEvents()
                     {
-                        OnAuthenticationFailed = c =>
+                        //OnAuthenticationFailed = c =>
+                       // {
+                       //   c.NoResult();
+                       // c.Response.StatusCode = 500;
+                       //c.Response.ContentType = "text/plain";
+                       //return c.Response.WriteAsync(c.Exception.ToString());
+                        //},
+                         OnAuthenticationFailed = context =>
                         {
-                            c.NoResult();
-                            c.Response.StatusCode = 500;
-                            c.Response.ContentType = "text/plain";
-                            return c.Response.WriteAsync(c.Exception.ToString());
+                            var result = "";
+                            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                            {
+                                context.Response.Headers.Add("Token-Expired", "true");
+                                result = JsonConvert.SerializeObject(new Response<string>("Token Expired", false, "Token Expired"));
+                            }
+                            else
+                            {
+                                result = JsonConvert.SerializeObject(new Response<string>("Token Authentication Failed", false, context.Exception.ToString()));
+                            }
+                            context.NoResult();
+                            context.Response.StatusCode = 900;
+                            context.Response.ContentType = "application/json";
+                            return context.Response.WriteAsync(result);
                         },
                         OnChallenge = context =>
                         {
