@@ -58,6 +58,7 @@ namespace FlightDeck.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseCors("FlightDeckOpen");
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
